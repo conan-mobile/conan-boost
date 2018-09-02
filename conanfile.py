@@ -53,10 +53,10 @@ class BoostConan(ConanFile):
 
     def configure(self):
         if self.zip_bzip2_requires_needed:
-            self.requires("bzip2/1.0.6@conan/stable")
+            self.requires("bzip2/1.0.6@conan-mobile/stable")
             self.options["bzip2"].shared = False
             
-            self.requires("zlib/1.2.11@conan/stable")
+            self.requires("zlib/1.2.11@conan-mobile/stable")
             self.options["zlib"].shared = False
 
     def package_id(self):
@@ -248,9 +248,17 @@ class BoostConan(ConanFile):
         contents += '\nusing "%s" : "%s" : ' % (toolset, version)
         contents += ' "%s"' % exe.replace("\\", "/")
 
+        if self.settings.os == "iOS":
+            arch = self.settings.get_safe('arch')
+            contents += ' -arch ' + tools.to_apple_arch(arch)
+        
         contents += " : \n"
-        if "AR" in os.environ:
+
+        if self.settings.os == "iOS":
+            contents += '<archiver>"%s" ' % tools.which('libtool').replace("\\", "/")
+        elif "AR" in os.environ:
             contents += '<archiver>"%s" ' % tools.which(os.environ["AR"]).replace("\\", "/")
+            
         if "RANLIB" in os.environ:
             contents += '<ranlib>"%s" ' % tools.which(os.environ["RANLIB"]).replace("\\", "/")
         if "CXXFLAGS" in os.environ:

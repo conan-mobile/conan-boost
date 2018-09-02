@@ -24,6 +24,10 @@ class DefaultNameConan(ConanFile):
         cmake.build()
 
     def test(self):
+        if tools.cross_building(self.settings):        
+            self.output.warn("Skipping run cross built package")
+            return
+        
         bt = self.settings.build_type
         re = RunEnvironment(self)
         with tools.environment_append(re.vars):
